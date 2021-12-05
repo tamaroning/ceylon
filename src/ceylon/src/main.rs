@@ -1,3 +1,3 @@
 fn main() {
-    println!("Hello, Ceylon!");
+    ceylon_driver::main()
 }
