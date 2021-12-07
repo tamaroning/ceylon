@@ -111,11 +111,11 @@ fn is_whitespace(c: char) -> bool {
 }
 
 fn is_id_start(c: char) -> bool {
-    c.is_ascii_alphanumeric() || c == '_'
+    c.is_ascii_alphabetic() || c == '_'
 }
 
 fn is_id_continue(c: char) -> bool {
-    c.is_ascii_alphanumeric()
+    c.is_ascii_alphanumeric() || c == '_'
 }
 
 /// Parses the first token from the provided input string.
@@ -154,7 +154,10 @@ impl Cursor<'_> {
             c if is_id_start(c) => self.ident(),
 
             // Numeric literal.
-            // TODO:
+            c @ '0'..='9' => {
+                let literal_kind = self.number(c);
+                TokenKind::Literal { kind: literal_kind }
+            }
 
             // One-symbol tokens.
             ';' => Semi,
@@ -219,6 +222,37 @@ impl Cursor<'_> {
     fn ident(&mut self) -> TokenKind {
         self.eat_while(is_id_continue);
         Ident
+    }
+
+    fn number(&mut self, _first_digit: char) -> LiteralKind {
+        // first_digit is going to be used to parse hex ("0x4ef", "0x08")
+        self.eat_decimal_digits();
+
+        match self.first() {
+            // Integer literals followed by dot can represent afield/method access
+            '.' if !is_id_start(self.second()) => {
+                self.bump(); // .
+                if self.first().is_digit(10) {
+                    self.eat_decimal_digits();
+                }
+                LiteralKind::Float
+            }
+            _ => LiteralKind::Int,
+        }
+    }
+
+    fn eat_decimal_digits(&mut self) -> bool {
+        let mut has_digits = false;
+        loop {
+            match self.first() {
+                '0'..='9' => {
+                    has_digits = true;
+                    self.bump();
+                }
+                _ => break,
+            }
+        }
+        has_digits
     }
 
     fn single_quoted_string(&mut self) -> bool {
