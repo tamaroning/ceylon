@@ -7,13 +7,13 @@ use self::TokenKind::*;
 use cursor::Cursor;
 
 pub struct StringReader<'a> {
-    src: &'a str,
+    pub src: &'a str,
     pos: usize,
     end_index: usize,
 }
 
 impl<'a> StringReader<'a> {
-    fn new(src: &'a str) -> Self {
+    pub fn new(src: &'a str) -> Self {
         StringReader {
             src,
             pos: 0,
@@ -21,7 +21,7 @@ impl<'a> StringReader<'a> {
         }
     }
 
-    fn next_token(&mut self) -> Token {
+    pub fn next_token(&mut self) -> Token {
         loop {
             let text = &self.src[self.pos..self.end_index];
             if text.is_empty() {
@@ -50,8 +50,8 @@ pub struct Token {
 
 #[derive(Debug, Copy, Clone)]
 pub struct Span {
-    start_pos: usize,
-    len: usize,
+    pub start_pos: usize,
+    pub len: usize,
 }
 
 impl Token {
@@ -72,8 +72,8 @@ pub enum TokenKind {
     Whitespace,
     /// "ident"
     Ident,
-    /// "12_u8", "1.0e-40", "b"123"". See `LiteralKind` for more details.
-    Literal { kind: LiteralKind },
+    /// "12_u8", "1.0e-40", "b"123"". See `LitKind` for more details.
+    Literal { kind: LitKind },
     // One-char tokens:
     /// ";"
     Semi,
@@ -136,7 +136,7 @@ pub enum TokenKind {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum LiteralKind {
+pub enum LitKind {
     /// "12", "39"
     Int,
     /// "12.34", "5.0"
@@ -239,7 +239,7 @@ impl Cursor<'_> {
             '\'' => {
                 let terminated = self.single_quoted_string();
                 Literal {
-                    kind: LiteralKind::Char { terminated },
+                    kind: LitKind::Char { terminated },
                 }
             }
 
@@ -247,7 +247,7 @@ impl Cursor<'_> {
             '"' => {
                 let terminated = self.double_quoted_string();
                 Literal {
-                    kind: LiteralKind::Str { terminated },
+                    kind: LitKind::Str { terminated },
                 }
             }
 
@@ -274,7 +274,7 @@ impl Cursor<'_> {
         Ident
     }
 
-    fn number(&mut self, _first_digit: char) -> LiteralKind {
+    fn number(&mut self, _first_digit: char) -> LitKind {
         // first_digit is going to be used to parse hex ("0x4ef", "0x08")
         self.eat_decimal_digits();
 
@@ -285,9 +285,9 @@ impl Cursor<'_> {
                 if self.first().is_digit(10) {
                     self.eat_decimal_digits();
                 }
-                LiteralKind::Float
+                LitKind::Float
             }
-            _ => LiteralKind::Int,
+            _ => LitKind::Int,
         }
     }
 
