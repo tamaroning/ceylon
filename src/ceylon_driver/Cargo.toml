@@ -4,4 +4,4 @@ version = "0.0.0"
 edition = "2021"
 
 [dependencies]
-ceylon_lexer = { path = "../ceylon_lexer" }
+ceylon_parser = { path = "../ceylon_parser" }
