@@ -6,15 +6,60 @@ mod tests;
 use self::TokenKind::*;
 use cursor::Cursor;
 
-#[derive(Debug)]
+pub struct StringReader<'a> {
+    src: &'a str,
+    pos: usize,
+    end_index: usize,
+}
+
+impl<'a> StringReader<'a> {
+    fn new(src: &'a str) -> Self {
+        StringReader {
+            src,
+            pos: 0,
+            end_index: src.len(),
+        }
+    }
+
+    fn next_token(&mut self) -> Token {
+        loop {
+            let text = &self.src[self.pos..self.end_index];
+            if text.is_empty() {
+                return Token::new(TokenKind::Eof, self.pos, 0);
+            }
+
+            let mut token = first_token(text);
+            token.span.start_pos = self.pos;
+            self.pos += token.span.len;
+
+            match token.kind {
+                TokenKind::Whitespace | TokenKind::LineComment => (),
+                _ => {
+                    return token;
+                }
+            }
+        }
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
 pub struct Token {
     pub kind: TokenKind,
-    pub len: usize,
+    pub span: Span,
+}
+
+#[derive(Debug, Copy, Clone)]
+pub struct Span {
+    start_pos: usize,
+    len: usize,
 }
 
 impl Token {
-    fn new(kind: TokenKind, len: usize) -> Token {
-        Token { kind, len }
+    pub fn new(kind: TokenKind, start_pos: usize, len: usize) -> Token {
+        Token {
+            kind,
+            span: Span { start_pos, len },
+        }
     }
 }
 
@@ -86,6 +131,8 @@ pub enum TokenKind {
     Percent,
     /// Unknown token, not expected by the lexer
     Unknown,
+    /// EOF
+    Eof,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -130,8 +177,9 @@ pub fn tokenize(mut input: &str) -> impl Iterator<Item = Token> + '_ {
         if input.is_empty() {
             return None;
         }
+
         let token = first_token(input);
-        input = &input[token.len..];
+        input = &input[token.span.len..];
         Some(token)
     })
 }
@@ -205,7 +253,9 @@ impl Cursor<'_> {
 
             _ => Unknown,
         };
-        Token::new(token_kind, self.len_consumed())
+        // NOTE: The tokenizer doesn't know the start position of the token.
+        // For now tokenizer sets token.span.start_pos 0.
+        Token::new(token_kind, 0, self.len_consumed())
     }
 
     fn line_comment(&mut self) -> TokenKind {
@@ -243,14 +293,9 @@ impl Cursor<'_> {
 
     fn eat_decimal_digits(&mut self) -> bool {
         let mut has_digits = false;
-        loop {
-            match self.first() {
-                '0'..='9' => {
-                    has_digits = true;
-                    self.bump();
-                }
-                _ => break,
-            }
+        while let '0'..='9' = self.first() {
+            has_digits = true;
+            self.bump();
         }
         has_digits
     }
