@@ -36,6 +36,8 @@ pub enum BinOp {
     Sub,
     Mul,
     Div,
+    Eq,
+    Ne,
 }
 
 #[derive(Debug)]

@@ -47,6 +47,24 @@ fn test_all_tokens() {
 }
 
 #[test]
+fn test_arrow() {
+    check_lexing(
+        "-> == != <= >=",
+        expect![[r#"
+            Token { kind: Arrow, span: Span { start_pos: 0, len: 2 } }
+            Token { kind: Whitespace, span: Span { start_pos: 0, len: 1 } }
+            Token { kind: EqEq, span: Span { start_pos: 0, len: 2 } }
+            Token { kind: Whitespace, span: Span { start_pos: 0, len: 1 } }
+            Token { kind: BangEq, span: Span { start_pos: 0, len: 2 } }
+            Token { kind: Whitespace, span: Span { start_pos: 0, len: 1 } }
+            Token { kind: LtEq, span: Span { start_pos: 0, len: 2 } }
+            Token { kind: Whitespace, span: Span { start_pos: 0, len: 1 } }
+            Token { kind: GtEq, span: Span { start_pos: 0, len: 2 } }
+        "#]],
+    );
+}
+
+#[test]
 fn test_textual_literal() {
     check_lexing(
         "'a''b''\\n''\\t''\\r'\"Hello\"\"//\"",
@@ -131,8 +149,7 @@ fn smoke_test() {
             Token { kind: OpenParen, span: Span { start_pos: 0, len: 1 } }
             Token { kind: CloseParen, span: Span { start_pos: 0, len: 1 } }
             Token { kind: Whitespace, span: Span { start_pos: 0, len: 1 } }
-            Token { kind: Minus, span: Span { start_pos: 0, len: 1 } }
-            Token { kind: Gt, span: Span { start_pos: 0, len: 1 } }
+            Token { kind: Arrow, span: Span { start_pos: 0, len: 2 } }
             Token { kind: Whitespace, span: Span { start_pos: 0, len: 1 } }
             Token { kind: Ident, span: Span { start_pos: 0, len: 4 } }
             Token { kind: Whitespace, span: Span { start_pos: 0, len: 1 } }
@@ -172,8 +189,7 @@ fn test_string_reader() {
             Token { kind: Ident, span: Span { start_pos: 23, len: 4 } }
             Token { kind: OpenParen, span: Span { start_pos: 27, len: 1 } }
             Token { kind: CloseParen, span: Span { start_pos: 28, len: 1 } }
-            Token { kind: Minus, span: Span { start_pos: 30, len: 1 } }
-            Token { kind: Gt, span: Span { start_pos: 31, len: 1 } }
+            Token { kind: Arrow, span: Span { start_pos: 30, len: 2 } }
             Token { kind: Keyword { kind: Void }, span: Span { start_pos: 33, len: 4 } }
             Token { kind: OpenBrace, span: Span { start_pos: 38, len: 1 } }
             Token { kind: Ident, span: Span { start_pos: 40, len: 7 } }

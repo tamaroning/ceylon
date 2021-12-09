@@ -120,6 +120,16 @@ pub enum TokenKind {
     Keyword { kind: KwKind },
     /// "12_u8", "1.0e-40", "b"123"". See `LitKind` for more details.
     Literal { kind: LitKind },
+    /// "->"
+    Arrow,
+    /// "=="
+    EqEq,
+    /// "!="
+    BangEq,
+    /// "<="
+    LtEq,
+    /// ">="
+    GtEq,
     // One-char tokens:
     /// ";"
     Semi,
@@ -287,11 +297,46 @@ impl Cursor<'_> {
             '?' => Question,
             ':' => Colon,
             '$' => Dollar,
-            '=' => Eq,
-            '!' => Bang,
-            '<' => Lt,
-            '>' => Gt,
-            '-' => Minus,
+            '=' => {
+                if self.first() == '=' {
+                    self.bump();
+                    EqEq
+                } else {
+                    Eq
+                }
+            }
+            '!' => {
+                if self.first() == '=' {
+                    self.bump();
+                    BangEq
+                } else {
+                    Bang
+                }
+            }
+            '<' => {
+                if self.first() == '=' {
+                    self.bump();
+                    LtEq
+                } else {
+                    Lt
+                }
+            }
+            '>' => {
+                if self.first() == '=' {
+                    self.bump();
+                    GtEq
+                } else {
+                    Gt
+                }
+            }
+            '-' => {
+                if self.first() == '>' {
+                    self.bump();
+                    Arrow
+                } else {
+                    Minus
+                }
+            }
             '&' => And,
             '|' => Or,
             '+' => Plus,
