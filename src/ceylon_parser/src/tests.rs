@@ -27,11 +27,11 @@ fn test_parse_float() {
 }
 
 #[test]
-fn test_parse_add() {
+fn test_parse_equality() {
     check_parsing(
-        "1 * 2 * 3",
+        "1 + 2 * 3 == 6",
         expect![[r#"
-            Expr { kind: Binary(Mul, Expr { kind: Binary(Mul, Expr { kind: Literal(Int(1)), span: Span { start_pos: 0, len: 1 } }, Expr { kind: Literal(Int(2)), span: Span { start_pos: 4, len: 1 } }), span: Span { start_pos: 0, len: 5 } }, Expr { kind: Literal(Int(3)), span: Span { start_pos: 8, len: 1 } }), span: Span { start_pos: 0, len: 9 } }
+            Expr { kind: Binary(Eq, Expr { kind: Binary(Add, Expr { kind: Literal(Int(1)), span: Span { start_pos: 0, len: 1 } }, Expr { kind: Binary(Mul, Expr { kind: Literal(Int(2)), span: Span { start_pos: 4, len: 1 } }, Expr { kind: Literal(Int(3)), span: Span { start_pos: 8, len: 1 } }), span: Span { start_pos: 4, len: 5 } }), span: Span { start_pos: 0, len: 9 } }, Expr { kind: Literal(Int(6)), span: Span { start_pos: 13, len: 1 } }), span: Span { start_pos: 0, len: 14 } }
         "#]],
     )
 }
