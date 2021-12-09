@@ -25,7 +25,10 @@ impl<'a> StringReader<'a> {
         loop {
             let text = &self.src[self.pos..self.end_index];
             if text.is_empty() {
-                let span = Span { start_pos: self.pos, len: 0 };
+                let span = Span {
+                    start_pos: self.pos,
+                    len: 0,
+                };
                 return Token::new(TokenKind::Eof, span);
             }
 
@@ -59,7 +62,10 @@ impl<'a> StringReader<'a> {
                 return t;
             }
         };
-        Token { kind: TokenKind::Keyword { kind: kw_kind }, span: t.span }
+        Token {
+            kind: TokenKind::Keyword { kind: kw_kind },
+            span: t.span,
+        }
     }
 
     pub fn span_to_str(&self, span: &Span) -> &str {
@@ -86,10 +92,7 @@ pub struct Span {
 
 impl Token {
     pub fn new(kind: TokenKind, span: Span) -> Token {
-        Token {
-            kind,
-            span,
-        }
+        Token { kind, span }
     }
 }
 
@@ -305,7 +308,10 @@ impl Cursor<'_> {
         };
         // NOTE: The tokenizer doesn't know the start position of the token.
         // For now tokenizer sets token.span.start_pos 0.
-        let span = Span { start_pos: 0, len: self.len_consumed() };
+        let span = Span {
+            start_pos: 0,
+            len: self.len_consumed(),
+        };
         Token::new(token_kind, span)
     }
 
