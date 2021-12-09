@@ -121,7 +121,7 @@ fn test_method_access() {
 #[test]
 fn smoke_test() {
     check_lexing(
-        "// my source file\nfunc main() -> Void { println(\"Hello.\"); }\n",
+        "// my source file\nfunc main() -> void { println(\"Hello.\"); }\n",
         expect![[r#"
             Token { kind: LineComment, span: Span { start_pos: 0, len: 17 } }
             Token { kind: Whitespace, span: Span { start_pos: 0, len: 1 } }
@@ -166,7 +166,7 @@ fn check_string_reader(src: &str, expect: Expect) {
 #[test]
 fn test_string_reader() {
     check_string_reader(
-        "// my source file\nfunc main() -> Void { println(\"Hello.\"); }\n",
+        "// my source file\nfunc main() -> void { println(\"Hello.\"); }\n",
         expect![[r#"
             Token { kind: Ident, span: Span { start_pos: 18, len: 4 } }
             Token { kind: Ident, span: Span { start_pos: 23, len: 4 } }
@@ -174,7 +174,7 @@ fn test_string_reader() {
             Token { kind: CloseParen, span: Span { start_pos: 28, len: 1 } }
             Token { kind: Minus, span: Span { start_pos: 30, len: 1 } }
             Token { kind: Gt, span: Span { start_pos: 31, len: 1 } }
-            Token { kind: Ident, span: Span { start_pos: 33, len: 4 } }
+            Token { kind: Keyword { kind: Void }, span: Span { start_pos: 33, len: 4 } }
             Token { kind: OpenBrace, span: Span { start_pos: 38, len: 1 } }
             Token { kind: Ident, span: Span { start_pos: 40, len: 7 } }
             Token { kind: OpenParen, span: Span { start_pos: 47, len: 1 } }
@@ -183,6 +183,24 @@ fn test_string_reader() {
             Token { kind: Semi, span: Span { start_pos: 57, len: 1 } }
             Token { kind: CloseBrace, span: Span { start_pos: 59, len: 1 } }
             Token { kind: Eof, span: Span { start_pos: 61, len: 0 } }
+        "#]],
+    )
+}
+
+#[test]
+fn test_keyword() {
+    check_string_reader(
+        "i64 u64 char str bool void if main",
+        expect![[r#"
+            Token { kind: Keyword { kind: I64 }, span: Span { start_pos: 0, len: 3 } }
+            Token { kind: Keyword { kind: U64 }, span: Span { start_pos: 4, len: 3 } }
+            Token { kind: Keyword { kind: Char }, span: Span { start_pos: 8, len: 4 } }
+            Token { kind: Keyword { kind: Str }, span: Span { start_pos: 13, len: 3 } }
+            Token { kind: Ident, span: Span { start_pos: 17, len: 4 } }
+            Token { kind: Keyword { kind: Void }, span: Span { start_pos: 22, len: 4 } }
+            Token { kind: Keyword { kind: If }, span: Span { start_pos: 27, len: 2 } }
+            Token { kind: Ident, span: Span { start_pos: 30, len: 4 } }
+            Token { kind: Eof, span: Span { start_pos: 34, len: 0 } }
         "#]],
     )
 }
