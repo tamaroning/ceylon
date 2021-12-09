@@ -8,7 +8,30 @@ impl Parser<'_> {
     }
 
     fn parse_operator_expression(&mut self) -> Expr {
-        self.parse_unary()
+        self.parse_mul()
+    }
+
+    fn parse_mul(&mut self) -> Expr {
+        let mut expr = self.parse_unary();
+
+        loop {
+            match self.token.kind {
+                TokenKind::Star => {
+                    self.bump();
+                    let oprand = self.parse_unary();
+                    let span = expr.span.append(oprand.span);
+                    expr = Expr::new(
+                        ExprKind::Binary(BinOp::Mul, Box::new(expr), Box::new(oprand)),
+                        span,
+                    )
+                }
+                TokenKind::Slash => {
+                    todo!();
+                }
+                _ => break,
+            }
+        }
+        expr
     }
 
     fn parse_unary(&mut self) -> Expr {

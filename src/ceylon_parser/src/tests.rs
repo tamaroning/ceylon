@@ -25,3 +25,13 @@ fn test_parse_float() {
         "#]],
     )
 }
+
+#[test]
+fn test_parse_add() {
+    check_parsing(
+        "1 * 2 * 3",
+        expect![[r#"
+            Expr { kind: Binary(Mul, Expr { kind: Binary(Mul, Expr { kind: Literal(Int(1)), span: Span { start_pos: 0, len: 1 } }, Expr { kind: Literal(Int(2)), span: Span { start_pos: 4, len: 1 } }), span: Span { start_pos: 0, len: 5 } }, Expr { kind: Literal(Int(3)), span: Span { start_pos: 8, len: 1 } }), span: Span { start_pos: 0, len: 9 } }
+        "#]],
+    )
+}

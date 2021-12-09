@@ -90,6 +90,17 @@ pub struct Span {
     pub len: usize,
 }
 
+impl Span {
+    pub fn append(&self, s: Span) -> Self {
+        let start_pos = std::cmp::min(self.start_pos, s.start_pos);
+        let end_pos = std::cmp::max(self.start_pos + self.len, s.start_pos + s.len);
+        Span {
+            start_pos,
+            len: end_pos - start_pos,
+        }
+    }
+}
+
 impl Token {
     pub fn new(kind: TokenKind, span: Span) -> Token {
         Token { kind, span }
