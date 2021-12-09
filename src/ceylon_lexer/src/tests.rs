@@ -11,7 +11,7 @@ fn check_lexing(src: &str, expect: Expect) {
 #[test]
 fn test_all_tokens() {
     check_lexing(
-        "// comment\n ;,.(){}[]@#~?:$=!<>-&|+*/^%",
+        "// comment\n ;,.(){}[]@#~?:$=!<>-&|+*/^% -> == != <= >= ",
         expect![[r#"
             Token { kind: LineComment, span: Span { start_pos: 0, len: 10 } }
             Token { kind: Whitespace, span: Span { start_pos: 0, len: 2 } }
@@ -42,15 +42,7 @@ fn test_all_tokens() {
             Token { kind: Slash, span: Span { start_pos: 0, len: 1 } }
             Token { kind: Caret, span: Span { start_pos: 0, len: 1 } }
             Token { kind: Percent, span: Span { start_pos: 0, len: 1 } }
-        "#]],
-    )
-}
-
-#[test]
-fn test_arrow() {
-    check_lexing(
-        "-> == != <= >=",
-        expect![[r#"
+            Token { kind: Whitespace, span: Span { start_pos: 0, len: 1 } }
             Token { kind: Arrow, span: Span { start_pos: 0, len: 2 } }
             Token { kind: Whitespace, span: Span { start_pos: 0, len: 1 } }
             Token { kind: EqEq, span: Span { start_pos: 0, len: 2 } }
@@ -60,8 +52,9 @@ fn test_arrow() {
             Token { kind: LtEq, span: Span { start_pos: 0, len: 2 } }
             Token { kind: Whitespace, span: Span { start_pos: 0, len: 1 } }
             Token { kind: GtEq, span: Span { start_pos: 0, len: 2 } }
+            Token { kind: Whitespace, span: Span { start_pos: 0, len: 1 } }
         "#]],
-    );
+    )
 }
 
 #[test]
