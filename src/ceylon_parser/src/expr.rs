@@ -7,29 +7,91 @@ impl Parser<'_> {
         self.parse_operator_expression()
     }
 
+    /// Parse operator expression
+    // Operator precedence is as follows:
+    // unary+,-  >  *,/,% > binary+,-  >  <,>,<=,>=  >  ==,!= 
     fn parse_operator_expression(&mut self) -> Expr {
-        self.parse_mul()
+        self.parse_equality()
+    }
+
+    fn parse_equality(&mut self) -> Expr {
+        let mut expr = self.parse_relational();
+        loop {
+            let binop = match self.token.kind {
+                TokenKind::EqEq => BinOp::Eq,
+                TokenKind::BangEq => BinOp::Ne,
+                _ => return expr,
+            };
+            // Eat a operator
+            self.bump();
+            let oprand = self.parse_relational();
+            let span = expr.span.append(oprand.span);
+            expr = Expr::new(
+                ExprKind::Binary(binop, Box::new(expr), Box::new(oprand)),
+                span,
+            );
+        }
+        expr
+    }
+
+    fn parse_relational(&mut self) -> Expr {
+        let mut expr = self.parse_add();
+        loop {
+            let binop = match self.token.kind {
+                TokenKind::Lt => BinOp::Lt,
+                TokenKind::Gt => BinOp::Gt,
+                TokenKind::LtEq => BinOp::Le,
+                TokenKind::GtEq => BinOp::Ge,
+                _ => return expr,
+            };
+            // Eat a operator
+            self.bump();
+            let oprand = self.parse_add();
+            let span = expr.span.append(oprand.span);
+            expr = Expr::new(
+                ExprKind::Binary(binop, Box::new(expr), Box::new(oprand)),
+                span,
+            );
+        }
+        expr
+    }
+
+    fn parse_add(&mut self) -> Expr {
+        let mut expr = self.parse_mul();
+        loop {
+            let binop = match self.token.kind {
+                TokenKind::Plus => BinOp::Add,
+                TokenKind::Minus => BinOp::Sub,
+                _ => return expr,
+            };
+            // Eat a operator
+            self.bump();
+            let oprand = self.parse_mul();
+            let span = expr.span.append(oprand.span);
+            expr = Expr::new(
+                ExprKind::Binary(binop, Box::new(expr), Box::new(oprand)),
+                span,
+            );
+        }
+        expr
     }
 
     fn parse_mul(&mut self) -> Expr {
         let mut expr = self.parse_unary();
-
         loop {
-            match self.token.kind {
-                TokenKind::Star => {
-                    self.bump();
-                    let oprand = self.parse_unary();
-                    let span = expr.span.append(oprand.span);
-                    expr = Expr::new(
-                        ExprKind::Binary(BinOp::Mul, Box::new(expr), Box::new(oprand)),
-                        span,
-                    )
-                }
-                TokenKind::Slash => {
-                    todo!();
-                }
-                _ => break,
-            }
+            let binop = match self.token.kind {
+                TokenKind::Star => BinOp::Mul,
+                TokenKind::Slash => BinOp::Div,
+                _ => return expr,
+            };
+            // Eat a operator
+            self.bump();
+            let oprand = self.parse_unary();
+            let span = expr.span.append(oprand.span);
+            expr = Expr::new(
+                ExprKind::Binary(binop, Box::new(expr), Box::new(oprand)),
+                span,
+            );
         }
         expr
     }
