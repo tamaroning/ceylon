@@ -29,7 +29,7 @@ impl<'a> Parser<'a> {
 
         Parser {
             token: reader.next_token(),
-            prev_token: Token::new(TokenKind::Unknown, 0, 0),
+            prev_token: Token::new(TokenKind::Unknown, Span { start_pos: 0, len: 0 }),
             reader,
         }
     }
@@ -37,9 +37,5 @@ impl<'a> Parser<'a> {
     fn bump(&mut self) {
         self.prev_token = self.token;
         self.token = self.reader.next_token();
-    }
-
-    pub fn span_to_str(&self, span: &Span) -> &str {
-        &self.reader.src[span.start_pos..span.start_pos + span.len]
     }
 }

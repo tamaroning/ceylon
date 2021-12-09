@@ -25,7 +25,8 @@ impl<'a> StringReader<'a> {
         loop {
             let text = &self.src[self.pos..self.end_index];
             if text.is_empty() {
-                return Token::new(TokenKind::Eof, self.pos, 0);
+                let span = Span { start_pos: self.pos, len: 0 };
+                return Token::new(TokenKind::Eof, span);
             }
 
             let mut token = first_token(text);
@@ -34,11 +35,40 @@ impl<'a> StringReader<'a> {
 
             match token.kind {
                 TokenKind::Whitespace | TokenKind::LineComment => (),
+                TokenKind::Ident => {
+                    return self.ident_to_keyword(token);
+                }
                 _ => {
                     return token;
                 }
             }
         }
+    }
+
+    fn ident_to_keyword(&self, t: Token) -> Token {
+        debug_assert!(matches!(t.kind, TokenKind::Ident));
+        let s = self.span_to_str(&t.span);
+        let kw_kind = match s {
+            "i64" => KwKind::I64,
+            "u64" => KwKind::U64,
+            "char" => KwKind::Char,
+            "str" => KwKind::Str,
+            "void" => KwKind::Void,
+            "if" => KwKind::If,
+            _ => {
+                return t;
+            }
+        };
+        Token { kind: TokenKind::Keyword { kind: kw_kind }, span: t.span }
+    }
+
+    pub fn span_to_str(&self, span: &Span) -> &str {
+        &self.src[span.start_pos..span.start_pos + span.len]
+    }
+
+    pub fn quoted_to_str(&self, span: &Span) -> &str {
+        debug_assert!(span.start_pos + 1 <= span.start_pos + span.len - 1);
+        &self.src[span.start_pos + 1..span.start_pos + span.len - 1]
     }
 }
 
@@ -55,10 +85,10 @@ pub struct Span {
 }
 
 impl Token {
-    pub fn new(kind: TokenKind, start_pos: usize, len: usize) -> Token {
+    pub fn new(kind: TokenKind, span: Span) -> Token {
         Token {
             kind,
-            span: Span { start_pos, len },
+            span,
         }
     }
 }
@@ -72,6 +102,8 @@ pub enum TokenKind {
     Whitespace,
     /// "ident"
     Ident,
+    /// "i32", "if", "while"
+    Keyword { kind: KwKind },
     /// "12_u8", "1.0e-40", "b"123"". See `LitKind` for more details.
     Literal { kind: LitKind },
     // One-char tokens:
@@ -133,6 +165,24 @@ pub enum TokenKind {
     Unknown,
     /// EOF
     Eof,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum KwKind {
+    /// "i64"
+    I64,
+    /// "u64"
+    U64,
+    /// "bool"
+    Bool,
+    /// "char"
+    Char,
+    /// "void"
+    Void,
+    /// "str"
+    Str,
+    /// "if"
+    If,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -255,7 +305,8 @@ impl Cursor<'_> {
         };
         // NOTE: The tokenizer doesn't know the start position of the token.
         // For now tokenizer sets token.span.start_pos 0.
-        Token::new(token_kind, 0, self.len_consumed())
+        let span = Span { start_pos: 0, len: self.len_consumed() };
+        Token::new(token_kind, span)
     }
 
     fn line_comment(&mut self) -> TokenKind {
