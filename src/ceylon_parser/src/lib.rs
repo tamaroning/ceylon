@@ -29,7 +29,13 @@ impl<'a> Parser<'a> {
 
         Parser {
             token: reader.next_token(),
-            prev_token: Token::new(TokenKind::Unknown, Span { start_pos: 0, len: 0 }),
+            prev_token: Token::new(
+                TokenKind::Unknown,
+                Span {
+                    start_pos: 0,
+                    len: 0,
+                },
+            ),
             reader,
         }
     }

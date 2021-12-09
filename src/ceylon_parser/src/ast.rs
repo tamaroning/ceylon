@@ -1,4 +1,4 @@
-use ceylon_lexer::{LitKind, Span};
+use ceylon_lexer::Span;
 
 use super::*;
 
