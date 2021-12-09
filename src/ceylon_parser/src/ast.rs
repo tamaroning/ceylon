@@ -16,13 +16,9 @@ impl Expr {
 
 #[derive(Debug)]
 pub enum ExprKind {
-    Literal(Literal),
-    Binary(BinOpKind, Box<Expr>, Box<Expr>),
-}
-
-#[derive(Debug)]
-pub struct Literal {
-    pub kind: LiteralKind,
+    Literal(LiteralKind),
+    Binary(BinOp, Box<Expr>, Box<Expr>),
+    Unary(UnOp, Box<Expr>),
 }
 
 #[derive(Debug)]
@@ -35,9 +31,15 @@ pub enum LiteralKind {
 }
 
 #[derive(Debug)]
-pub enum BinOpKind {
+pub enum BinOp {
     Add,
     Sub,
     Mul,
     Div,
+}
+
+#[derive(Debug)]
+pub enum UnOp {
+    Not,
+    Neg,
 }

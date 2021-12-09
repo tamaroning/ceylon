@@ -8,6 +8,22 @@ impl Parser<'_> {
     }
 
     fn parse_operator_expression(&mut self) -> Expr {
+        self.parse_unary()
+    }
+
+    fn parse_unary(&mut self) -> Expr {
+        match self.token.kind {
+            TokenKind::Plus => {
+                self.bump();
+            }
+            TokenKind::Minus => {
+                todo!()
+            }
+            TokenKind::Bang => {
+                todo!()
+            }
+            _ => (),
+        }
         self.parse_primary()
     }
 
@@ -29,18 +45,14 @@ impl Parser<'_> {
             TokenKind::Literal { kind: LitKind::Int } => {
                 let s = self.reader.span_to_str(&t.span);
                 let n = s.parse::<u128>().unwrap();
-                Literal {
-                    kind: LiteralKind::Int(n),
-                }
+                LiteralKind::Int(n)
             }
             TokenKind::Literal {
                 kind: LitKind::Float,
             } => {
                 let s = self.reader.span_to_str(&t.span);
                 let f = s.parse::<f64>().unwrap();
-                Literal {
-                    kind: LiteralKind::Float(f),
-                }
+                LiteralKind::Float(f)
             }
             TokenKind::Literal {
                 kind: LitKind::Char { terminated: termi },
@@ -50,9 +62,7 @@ impl Parser<'_> {
                 }
                 let s = self.reader.quoted_to_str(&t.span);
                 let c = unescape(s).chars().nth(0).unwrap();
-                Literal {
-                    kind: LiteralKind::Char(c),
-                }
+                LiteralKind::Char(c)
             }
             TokenKind::Literal {
                 kind: LitKind::Str { terminated: termi },
@@ -61,9 +71,7 @@ impl Parser<'_> {
                     panic!("Not terminated");
                 }
                 let s = self.reader.quoted_to_str(&t.span);
-                Literal {
-                    kind: LiteralKind::Str(unescape(s)),
-                }
+                LiteralKind::Str(unescape(s))
             }
             _ => unreachable!(),
         };
